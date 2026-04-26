@@ -1,0 +1,59 @@
+{
+  "turns": [
+    {
+      "turn": 1,
+      "request": {
+        "systemChars": 443,
+        "toolsChars": 1959,
+        "messagesChars": 340,
+        "totalChars": 2742
+      },
+      "responseTextChars": 0,
+      "toolCalls": 2
+    },
+    {
+      "turn": 2,
+      "request": {
+        "systemChars": 443,
+        "toolsChars": 1959,
+        "messagesChars": 3617,
+        "totalChars": 6019
+      },
+      "responseTextChars": 95,
+      "toolCalls": 0
+    },
+    {
+      "turn": 3,
+      "request": {
+        "systemChars": 443,
+        "toolsChars": 1959,
+        "messagesChars": 4035,
+        "totalChars": 6437
+      },
+      "responseTextChars": 0,
+      "toolCalls": 2
+    },
+    {
+      "turn": 4,
+      "request": {
+        "systemChars": 443,
+        "toolsChars": 1959,
+        "messagesChars": 7107,
+        "totalChars": 9509
+      },
+      "responseTextChars": 0,
+      "toolCalls": 1
+    },
+    {
+      "turn": 5,
+      "request": {
+        "systemChars": 443,
+        "toolsChars": 1959,
+        "messagesChars": 9805,
+        "totalChars": 12207
+      },
+      "responseTextChars": 95,
+      "toolCalls": 0
+    }
+  ]
+}

@@ -1,0 +1,158 @@
+{
+  "turns": [
+    {
+      "turn": 1,
+      "request": {
+        "systemChars": 443,
+        "toolsChars": 1959,
+        "messagesChars": 540,
+        "totalChars": 2942
+      },
+      "responseTextChars": 0,
+      "toolCalls": 2
+    },
+    {
+      "turn": 2,
+      "request": {
+        "systemChars": 443,
+        "toolsChars": 1959,
+        "messagesChars": 993,
+        "totalChars": 3395
+      },
+      "responseTextChars": 0,
+      "toolCalls": 2
+    },
+    {
+      "turn": 3,
+      "request": {
+        "systemChars": 443,
+        "toolsChars": 1959,
+        "messagesChars": 15118,
+        "totalChars": 17520
+      },
+      "responseTextChars": 143,
+      "toolCalls": 0
+    },
+    {
+      "turn": 4,
+      "request": {
+        "systemChars": 443,
+        "toolsChars": 1959,
+        "messagesChars": 16714,
+        "totalChars": 19116
+      },
+      "responseTextChars": 0,
+      "toolCalls": 2
+    },
+    {
+      "turn": 5,
+      "request": {
+        "systemChars": 443,
+        "toolsChars": 1959,
+        "messagesChars": 29841,
+        "totalChars": 32243
+      },
+      "responseTextChars": 0,
+      "toolCalls": 1
+    },
+    {
+      "turn": 6,
+      "request": {
+        "systemChars": 443,
+        "toolsChars": 1959,
+        "messagesChars": 30670,
+        "totalChars": 33072
+      },
+      "responseTextChars": 0,
+      "toolCalls": 1
+    },
+    {
+      "turn": 7,
+      "request": {
+        "systemChars": 443,
+        "toolsChars": 1959,
+        "messagesChars": 44103,
+        "totalChars": 46505
+      },
+      "responseTextChars": 0,
+      "toolCalls": 1
+    },
+    {
+      "turn": 8,
+      "request": {
+        "systemChars": 443,
+        "toolsChars": 1959,
+        "messagesChars": 44716,
+        "totalChars": 47118
+      },
+      "responseTextChars": 0,
+      "toolCalls": 1
+    },
+    {
+      "turn": 9,
+      "request": {
+        "systemChars": 443,
+        "toolsChars": 1959,
+        "messagesChars": 45341,
+        "totalChars": 47743
+      },
+      "responseTextChars": 0,
+      "toolCalls": 1
+    },
+    {
+      "turn": 10,
+      "request": {
+        "systemChars": 443,
+        "toolsChars": 1959,
+        "messagesChars": 46124,
+        "totalChars": 48526
+      },
+      "responseTextChars": 0,
+      "toolCalls": 1
+    },
+    {
+      "turn": 11,
+      "request": {
+        "systemChars": 443,
+        "toolsChars": 1959,
+        "messagesChars": 46724,
+        "totalChars": 49126
+      },
+      "responseTextChars": 0,
+      "toolCalls": 1
+    },
+    {
+      "turn": 12,
+      "request": {
+        "systemChars": 443,
+        "toolsChars": 1959,
+        "messagesChars": 47819,
+        "totalChars": 50221
+      },
+      "responseTextChars": 0,
+      "toolCalls": 1
+    },
+    {
+      "turn": 13,
+      "request": {
+        "systemChars": 443,
+        "toolsChars": 1959,
+        "messagesChars": 48641,
+        "totalChars": 51043
+      },
+      "responseTextChars": 0,
+      "toolCalls": 1
+    },
+    {
+      "turn": 14,
+      "request": {
+        "systemChars": 443,
+        "toolsChars": 1959,
+        "messagesChars": 49384,
+        "totalChars": 51786
+      },
+      "responseTextChars": 176,
+      "toolCalls": 0
+    }
+  ]
+}

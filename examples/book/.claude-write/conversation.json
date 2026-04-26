@@ -1,0 +1,15 @@
+[
+  {
+    "role": "user",
+    "content": "<task>\nwrite a didactic novel or scenario-driven narrative to teach agentic harness engineering ideas like The Goal by Eliyahu Goldratt teaches operations and Data-Oriented Programming by Yehonathan Sharvit teaches software design\n</task>\n\n<filesystem>\n  <file path=\"manuscript.md\" bytes=\"0\" words=\"0\" lines=\"1\" headings=\"0\" />\n  <file path=\"memory.md\" bytes=\"0\" words=\"0\" lines=\"1\" headings=\"0\" />\n</filesystem>"
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "Pass 0001: write memory.md (376 chars); write manuscript.md (39824 chars). Tool errors: read: ; read: ."
+      }
+    ]
+  }
+]

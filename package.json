@@ -1,0 +1,30 @@
+{
+  "name": "claude-write",
+  "version": "0.1.0",
+  "description": "A minimal writing agent",
+  "type": "module",
+  "bin": {
+    "claude-write": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "src/prompts"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "build": "tsc && chmod +x dist/cli.js && rm -rf dist/prompts && cp -r src/prompts dist/prompts",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.30.0",
+    "commander": "^12.1.0",
+    "dotenv": "^16.4.7",
+    "openai": "^4.77.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.5.0"
+  }
+}

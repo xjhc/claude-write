@@ -1,0 +1,81 @@
+{
+  "turns": [
+    {
+      "turn": 1,
+      "request": {
+        "systemChars": 443,
+        "toolsChars": 1959,
+        "messagesChars": 3907,
+        "totalChars": 6309
+      },
+      "responseTextChars": 0,
+      "toolCalls": 2
+    },
+    {
+      "turn": 2,
+      "request": {
+        "systemChars": 443,
+        "toolsChars": 1959,
+        "messagesChars": 8761,
+        "totalChars": 11163
+      },
+      "responseTextChars": 0,
+      "toolCalls": 1
+    },
+    {
+      "turn": 3,
+      "request": {
+        "systemChars": 443,
+        "toolsChars": 1959,
+        "messagesChars": 12028,
+        "totalChars": 14430
+      },
+      "responseTextChars": 0,
+      "toolCalls": 1
+    },
+    {
+      "turn": 4,
+      "request": {
+        "systemChars": 443,
+        "toolsChars": 1959,
+        "messagesChars": 13116,
+        "totalChars": 15518
+      },
+      "responseTextChars": 44,
+      "toolCalls": 0
+    },
+    {
+      "turn": 5,
+      "request": {
+        "systemChars": 443,
+        "toolsChars": 1959,
+        "messagesChars": 13484,
+        "totalChars": 15886
+      },
+      "responseTextChars": 0,
+      "toolCalls": 1
+    },
+    {
+      "turn": 6,
+      "request": {
+        "systemChars": 443,
+        "toolsChars": 1959,
+        "messagesChars": 16615,
+        "totalChars": 19017
+      },
+      "responseTextChars": 0,
+      "toolCalls": 1
+    },
+    {
+      "turn": 7,
+      "request": {
+        "systemChars": 443,
+        "toolsChars": 1959,
+        "messagesChars": 19642,
+        "totalChars": 22044
+      },
+      "responseTextChars": 54,
+      "toolCalls": 0
+    }
+  ]
+}

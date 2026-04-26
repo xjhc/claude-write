@@ -1,0 +1,15 @@
+[
+  {
+    "role": "user",
+    "content": "<task>\nwrite a didactic novel or scenario-driven narrative to teach agentic harness engineering. Use a business-and-technical learning story structure with recurring characters, concrete incidents, and practical lessons; do not imitate any specific author's prose.\n</task>"
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "Pass 0001: write memory.md (1744 chars); write manuscript.md (32256 chars); patch memory.md (403 chars); patch manuscript.md (639 chars); patch manuscript.md (705 chars)."
+      }
+    ]
+  }
+]

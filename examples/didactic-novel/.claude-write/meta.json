@@ -1,0 +1,5 @@
+{
+  "provider": "azure",
+  "model": "gpt-5.4",
+  "task": "write a didactic novel or scenario-driven narrative to teach agentic harness engineering. Use a business-and-technical learning story structure with recurring characters, concrete incidents, and practical lessons; do not imitate any specific author's prose."
+}

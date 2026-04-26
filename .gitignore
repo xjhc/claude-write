@@ -1,0 +1,21 @@
+node_modules/
+dist/
+*.log
+.env
+!.env.example
+
+# Local harness projects and generated run experiments.
+/.claude/
+/.codex
+/.claude-write/
+/.pytest_cache/
+/book/
+/book-*/
+/poem-*/
+/didactic/
+/kids-book/
+/myproj/
+/test-fog/
+
+# Research/reference clones.
+/references/
