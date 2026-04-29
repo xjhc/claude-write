@@ -16,16 +16,16 @@ Code IDEs are GUI-forward because human eyes parse spatial layouts fast. LLMs do
 - **Numbers and lists, not bar charts.** A list of word counts is more legible to an LLM than a rendered minimap.
 - **Don't ASCII-art visual encodings.** They waste tokens and add no information.
 - **Affordances that depend on clicking become tool calls.** "Hover for definition" → `define(name)`.
-- **Use the bandwidth.** A prose lint can be a paragraph, not a tooltip; a refactor preview can include intent alongside the diff. LLMs can produce and consume rich natural language directly.
+- **Use the bandwidth.** A prose lint can be a paragraph, not a tooltip; a refactor preview can include intent alongside the diff.
 
 ## Two operators
 
-A writing IDE has two operators: the agent and the human. They share primitives — outline, entity index, diagnostics, refactor ops — but render differently:
+A writing IDE has two operators: the agent and the human. They share primitives but render differently:
 
 - **Agent IDE**: tool calls and structured text responses. Subject of this document.
 - **Human IDE**: GUI-forward, optional, layered on the same primitives later.
 
-Build the agent IDE first. The human IDE is a frontend over the same data.
+Build the agent IDE first.
 
 ## Layers
 
@@ -39,30 +39,63 @@ Addressable units of prose. Without this, nothing else is possible.
 
 The artifact is opaque text — whatever form fits the work (poem, screenplay, prose, page-by-page). The harness imposes no format on the prose itself. Two XML-shaped tags ride on top:
 
-- `<section name="..." summary="...">...</section>` — addressable units. The agent picks the unit per-artifact (stanza, scene, page, chapter).
-- `<note>...</note>` — inline annotations the agent leaves for future passes. Optional.
+- `<section id="..." title="..." summary="...">...</section>` — addressable units.
+- `<note source="agent|user" status="open|addressed|deferred">...</note>` — annotations.
 
-Section names are stable IDs. Summaries make `outline()` carry meaning instead of just being a TOC of names.
+Section attributes:
+- `id` (required) — stable slug, the lookup key. Persists across rename.
+- `title` (optional) — display label. Cosmetic; can change without breaking references.
+- `summary` (optional but expected) — one-line content abstract. Powers `outline()`.
+
+Note attributes:
+- `source` — `agent` (default) or `user`. The user's are picked up via `unresolved()`.
+- `status` — `open` (default), `addressed`, or `deferred`. Status transitions are explicit so the audit trail survives; deletion is allowed but loses provenance.
+
+#### Reserved markup
+
+Only `<section>` and `<note>` are reserved. Anything else — `<foo>`, screenplay sluglines, HTML the agent quotes — passes through verbatim as prose.
+
+Reserved tags must be well-formed: matched open and close, attributes in `name="value"` form. Inside attribute values, the quote character must be escaped (`&quot;`). Inside prose, the only literal sequences to avoid are `</section>` and `</note>` themselves; if they need to appear (e.g., as quoted text about the format), escape them as `&lt;/section&gt;` and `&lt;/note&gt;`.
+
+The harness validates reserved markup on every read. It does not enforce universal entity escaping of `<`, `>`, `&` in prose — that would impose ceremony on artifact forms that don't need it (poems, screenplays, plain prose).
+
+Malformed reserved markup (unclosed `<section>`, stray `</section>`, unquoted attribute, etc.) does not crash. The parser returns diagnostics and refuses any structural mutation while the document is malformed. Reads still work and surface the problem.
+
+#### Bootstrapping unsectioned manuscripts
+
+Existing manuscripts (and new ones the agent hasn't sectioned) are valid. The parser treats an unsectioned file as a single synthetic section with id `__whole_file__`. `outline()` returns one entry; `read_section("__whole_file__")` returns the entire file.
+
+`__whole_file__` is never written to disk as a real `<section>` tag. The agent converts to real sections by calling `patch_section("__whole_file__", newContent, expectedHash)` where `newContent` contains real `<section>` tags. The synthetic id is the only way to address an unsectioned manuscript through the structural tools; once any real section exists, the synthetic id stops applying.
+
+Top-level notes in a sectioned manuscript (a `<note>` outside any `<section>`) are valid. They are listed by `notes()` / `unresolved()` with empty-string section attribution and stripped by `render()`. Use `resolve_note("", index, expectedHash, status)` for them — the hash precondition still applies.
 
 #### Operations
 
 ```ts
-outline(): Array<{ name: string; summary: string; words: number }>
-read_section(name: string): string
-patch_section(name: string, content: string): void
-render(path: "manuscript" | "memory"): string  // XML stripped
-notes(): Array<{ section: string; content: string }>
+outline(): Array<{ id: string; title?: string; summary?: string; words: number; hash: string }>
+read_section(id: string): { content: string; hash: string }
+patch_section(id: string, content: string, expectedHash: string): { hash: string }
+replace_in_section(id: string, find: string, replace: string, expectedHash: string): { hash: string }
+render(): string  // manuscript only; strips reserved tags, preserves body and spacing
+notes(): Array<{ section: string; source: "agent" | "user"; status: string; content: string }>
 ```
 
-`outline()` is the agent's mental map — the cheap structural read. `patch_section` is surgical replace, no anchor matching, no exact-match fragility. `render` is the publish step.
+Mutation safety:
+- All mutating section ops require `expectedHash`. The harness compares it to the current section hash and refuses on mismatch (the agent is editing stale content). The new hash is returned so the agent can chain edits.
+- `replace_in_section` must match `find` *exactly once* inside the named section. Zero matches → error. Multiple matches → error with a count. Use `patch_section` for whole-section rewrites.
+
+Render rules:
+- Strips `<section>` open/close tags, `<note>` blocks (all sources, all statuses), and entity escapes.
+- Preserves body text and inter-section spacing exactly.
+- Does *not* emit `## Title` or any Markdown structure. Title emission would impose Markdown on poems, scripts, and page prose. If a future renderer wants titled output, it goes through a separate option, not the default.
 
 #### Why this shape
 
-- **XML over Markdown structure.** Markdown headings work for nonfiction prose but break for poetry, screenplays, page-by-page books. XML wraps any prose form and stays parseable.
-- **One annotation tag, not many.** Don't pre-design `<question>`, `<scaffold>`, etc. Promote a tag only when real runs show repeated content patterns.
-- **Inline, not sidecar.** Sidecar annotations rot when prose changes (anchor drift). Inline tags travel with the prose.
-- **Summary as attribute, not first-line convention.** Explicit is parseable; convention forces the agent to reason about boundaries.
-- **The `.md` extension on `manuscript.md` is a soft commitment we may want to drop.** The artifact form is the agent's call.
+- **XML over Markdown structure.** Markdown headings work for nonfiction prose but break for poetry, screenplays, page-by-page books. XML wraps any prose form.
+- **One annotation tag, not many.** `<note source=...>` covers both agent and user notes; promote a typed tag only when real runs show repeated patterns.
+- **Inline, not sidecar.** Sidecar annotations rot when prose changes. Inline tags travel with the prose.
+- **`id` separate from `title` and `summary`.** Three roles, three fields. Conflating them breaks rename.
+- **Hashes, not optimistic writes.** The agent works in long sessions; the file may have moved between reads. `expectedHash` makes stale-state edits visible instead of silent.
 
 ### 2. Steering layer
 
@@ -70,17 +103,16 @@ Cheap human-in-loop. Depends only on the structural layer; ship it second.
 
 #### Convention
 
-The user leaves `<user-note>tighten this</user-note>` anywhere in the manuscript. The agent picks it up next pass and addresses it.
+The user (or the agent) leaves `<note source="user">tighten this</note>` anywhere in the manuscript. Status starts `open`. The agent picks them up next pass.
 
 #### Operations
 
 ```ts
-unresolved(): Array<{ section: string; content: string }>
+unresolved(): Array<{ section: string; index: number; hash: string; content: string }>
+resolve_note(section: string, index: number, expectedHash: string, status: "addressed" | "deferred"): void
 ```
 
-The agent's punch list. Calling `unresolved()` at the start of a pass tells it where the user wants attention.
-
-This is the highest-leverage human-in-loop primitive: the user opens the file, scatters notes in plain English, saves, runs `step`. The agent does the rest.
+The agent's punch list. Calling `unresolved()` at the start of a pass tells it where the user wants attention. After acting, it transitions status to `addressed` (or `deferred` with a reason). The `expectedHash` precondition refuses on stale state — if notes shifted between `unresolved()` and `resolve_note()`, the call is rejected rather than silently resolving the wrong note. Status preserves audit trail; deletion is allowed but discouraged.
 
 ### 3. Entity layer
 
@@ -88,40 +120,42 @@ Semantic indexing. Go-to-definition for prose: characters, places, themes, motif
 
 #### Convention
 
-memory.md is already Markdown by convention. Entity entries live there as headings:
+memory.md is already Markdown. Entity entries are headings with optional aliases:
 
 ```md
 ## Elena
-Protagonist. Sister of Marcus. Archeologist. Introduced in opening.
+aliases: Elena Vasquez, Dr. Vasquez, the archeologist
+Protagonist. Sister of Marcus. Introduced in opening.
 
 ## Marcus
 Antagonist. Elena's brother. Sealed the tomb.
 
 ## Grief (theme)
+aliases: mourning, loss
 Introduced opening; resurfaces midpoint, climax.
 ```
 
-No new tags inside the manuscript. Entries are plain headings + prose, in the form the agent already writes.
+Aliases are names, nicknames, titles, and distinctive phrases. Not pronouns. Pronoun/coreference resolution is a future LLM-driven extension; including pronouns in aliases would make `references()` too noisy to be useful.
 
 #### Operations
 
 ```ts
-references(name: string): Array<{ section: string; excerpt: string }>
+references(name: string): Array<{ section: string; excerpt: string; matched: string }>
 define(name: string): string  // returns the matching `## Name` block from memory.md
 ```
 
-`references` is grep with section context. `define` is hover-for-bio. The agent maintains the `## Name` blocks; the harness reads them.
+`references` greps for the canonical name + any declared aliases, returns matches grouped by section. `matched` records which alias hit so the agent can spot alias drift.
 
-Long manuscripts where re-reading is expensive get the most leverage from this layer.
+`rename_entity` (refactor layer) reuses the alias index — without it, rename would miss nicknames.
 
 ### 4. Diagnostic layer
 
-Lint, but for prose. The most underdeveloped frontier in writing tools and LLM-cheap to compute.
+Lint, but for prose. LLM-cheap to compute and absent from existing tools.
 
 #### Categories
 
 - **Continuity:** "blue eyes" in chapter 2, "brown" in chapter 9.
-- **Outline drift:** the section's `summary` attribute no longer matches its prose.
+- **Outline drift:** the section's `summary` no longer matches its prose.
 - **POV / tense consistency:** drift from declared POV/tense.
 - **Repetition:** overused words within or across sections.
 - **Pacing:** word-count outliers among sections.
@@ -131,12 +165,13 @@ Lint, but for prose. The most underdeveloped frontier in writing tools and LLM-c
 
 ```ts
 check(scope?: string): Array<Finding>
-// Finding: { kind, location, message, suggestion? }
+// Finding: { id, kind, section, message, suggestion? }
+suppress(findingId: string, reason: string): void
 ```
 
-Returned as a structured list. The agent is expected to act on findings, not just see them.
+Each finding has a stable `id` derived from `hash(kind + section + canonicalized_message)`. The same problem produces the same id across passes, so the agent can track what it has and hasn't addressed.
 
-Diagnostics is the layer where the IDE *feels* like an IDE — there are signals, and the agent has work it can do without being asked.
+Suppressions live in memory.md as a `## Suppressed` block listing finding ids with rationale. `check()` filters them out. This lets the user say "ignore this continuity warning" durably.
 
 ### 5. Refactoring layer
 
@@ -146,10 +181,10 @@ Beyond `patch_section` — structural and semantic edits writers don't have reli
 
 ```ts
 // Structural
-move_section(name: string, before?: string, after?: string): void
-split_section(name: string, at: string, new_name: string): void
+move_section(id: string, before?: string, after?: string): void
+split_section(id: string, at: string, new_id: string): void
 merge_sections(a: string, b: string, into: string): void
-rename_section(old: string, new_name: string): void
+rename_section_id(old: string, new_id: string): { references_updated: number }
 
 // Semantic (LLM-driven)
 rename_entity(old: string, new_name: string): { changed: number }
@@ -157,7 +192,7 @@ change_pov(target: "first" | "third"): { changed: number }
 change_tense(target: "past" | "present"): { changed: number }
 ```
 
-`rename_entity` is the killer app — find/replace handles `Elena → Marisol` poorly because pronouns, possessives, and nicknames need contextual handling. With the LLM in the loop, all of these become tractable.
+`rename_entity` is the killer app — find/replace handles `Elena → Marisol` poorly because pronouns, possessives, and nicknames need contextual handling. With the LLM in the loop and the alias index from the entity layer, all of these become tractable.
 
 Each semantic refactor returns a count of changed locations and (later) a diff before commit.
 
@@ -165,29 +200,29 @@ Each semantic refactor returns a count of changed locations and (later) a diff b
 
 Each phase shippable on its own:
 
-1. **Structural.** `<section>`, `<note>`, `outline`, `read_section`, `patch_section`, `render`, `notes`. Foundation.
-2. **Steering.** `<user-note>` + `unresolved()`. Cheap and high-leverage; depends only on the structural layer.
-3. **Entity.** memory.md `## Name` convention + `references` / `define`. Pays off on long manuscripts.
-4. **Diagnostics.** `check()` with the categories above. The "IDE feel" inflection point.
+1. **Structural.** `<section>`, `<note>`, parser + validation, `outline`, `read_section`, `patch_section`, `replace_in_section`, `render`, `notes`. Foundation. Includes `__whole_file__` migration path.
+2. **Steering.** `<note source="user">` + `unresolved()` + `resolve_note()`. Cheap and high-leverage.
+3. **Entity.** memory.md `## Name` + aliases convention + `references` / `define`. Pays off on long manuscripts.
+4. **Diagnostics.** `check()` with stable finding ids and `suppress()`. The "IDE feel" inflection point.
 5. **Refactoring.** `move_section`, `rename_entity`, `change_pov`, etc. The differentiator.
 
 ## What it retires
 
-- The `patch()` exact-match-only TODO. `patch_section` is anchor-free.
-- Brittle line-range reads. `read_section` is name-addressed.
+- The `patch()` exact-match-only TODO. `patch_section` is anchor-free and hash-preconditioned.
+- Brittle line-range reads. `read_section` is id-addressed.
 - The agent's habit of full-file reads. `outline()` becomes the default first move — the prompt has to make it the habit.
 
 ## Prompt implications
 
 The agent prompt has to teach the new defaults:
 
-- Use `outline()` before reading. Read sections by name, not the whole file.
+- Use `outline()` before reading. Read sections by id, not the whole file.
 - Maintain `summary` as you edit. Stale summaries make `outline()` lie.
 - Address `unresolved()` at the start of every pass.
-- For long manuscripts, maintain `## Name` entries in memory.md so `define()` and `references()` stay useful.
+- For long manuscripts, maintain `## Name` entries (with aliases) in memory.md.
 
 The harness gives the option; the prompt has to make these the habit.
 
 ## Status
 
-Proposed. The structural and steering layers are the immediate next implementation targets. Everything else lands as the foundation proves out.
+Proposed. Phase 1 is the immediate implementation target. Everything else lands as the foundation proves out.

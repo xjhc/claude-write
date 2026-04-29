@@ -15,7 +15,8 @@
   },
   "scripts": {
     "build": "tsc && chmod +x dist/cli.js && rm -rf dist/prompts && cp -r src/prompts dist/prompts",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "test": "npm run build --silent && node --test 'tests/*.test.mjs'"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.30.0",
