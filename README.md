@@ -35,6 +35,10 @@ A minimal writing agent.
 - Skills: `skills/**/SKILL.md` files with name, description, and body. Inject only names/descriptions into the system prompt; let the agent load skill bodies via `read` when useful.
 - Streaming: mainly improves perceived progress; tool calls still need complete JSON before execution.
 
+## Lessons
+
+- **PR #1 (closed) — IDE-shaped tool layer.** Tried adding sections, outline, mechanical lints, and an entity index (12 new tools). The agent reached for them, but prose quality didn't improve and trajectories got busier. The mistake was projecting human cognition onto the model: an IDE extends bounded human working memory; the LLM has none of those limits and isn't helped by their fixes. LLMs are token-scaled generators sharpened by generate → check → revise loops with external grounding. Build for that shape — cheap verification, environment signals, user steering — not for how a human reads a document.
+
 ## What It Does
 
 `claude-write` creates a project directory with:
