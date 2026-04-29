@@ -6,11 +6,16 @@ A minimal writing agent.
 
 - Harness = mechanism, prompt = policy, model = judgment. Don't encode agent behavior in harness logic — that's GOFAI.
 - The harness is the easy half; the prompt is the hard half. Getting the model to use those mechanisms correctly, at the right times, is the harder problem.
+- Models behave differently, so we need to re-test the prompt every time the model changes.
 - Use conversation format. LLMs are trained on conversation. Everything the model needs — context, tool results, user guidance, reminders, recoverable errors — is a message in that conversation.
+- "Use conversation format" is right, but the hard part is deciding what enters the conversation. This is context engineering. The harness should own retrieval, truncation, salience, recency, and conflict handling.
+- Use natural language. Construct the right textual world, let the model think inside it, and capture the result. Make it easy to understand what the agent is doing / thinking, and make it cheap to provide feedback.
 - The harness calls the model in a loop. If the response contains tool calls, it executes them, appends results to messages, and calls again. When the model returns no tool calls, the current run is done.
 - Never modify agent completions. Raw assistant/tool-call turns are the model's own voice; harness-authored summaries and reminders are separate messages.
 - Separation of concerns: the model handles the task, the harness handles infrastructure. Provider failures retry in the harness; recoverable tool errors are returned to the model as messages.
-- LLM memory is not reliable. When file contents matter, read — don't trust what the model said it wrote.
+- Selection is exogenous. The harness's job: connect the agent to environments that produce signals (compiler, tests, user feedback) and help the agent apply signals (accumulate skills/memory, surface it on future passes).
+- Human feedback should be cheap, especially for weak-feedback domains (e.g. creative writing). The harness should make it easy for the user to provide steer (e.g. summarize findings, recommendations).
+- State has ownership. Files, tool outputs, tests, user instructions, and committed memory have different authority. The harness should make those boundaries explicit. When file contents matter, read — don't trust what the model said it wrote (reading is cheap!).
 
 ## Design Choices
 
